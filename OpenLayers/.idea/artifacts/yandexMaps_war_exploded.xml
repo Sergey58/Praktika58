@@ -1,0 +1,17 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="yandexMaps:war exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/yandexMaps_war_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="yandexMaps/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="yandexMaps" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="postgresql-9.3-1103.jdbc3" />
+          <element id="file-copy" path="$USER_HOME$/Downloads/postgresql-9.4.1212.jre6.jar" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>

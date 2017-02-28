@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>admins panel</title>
+
+    <script src="https://code.jquery.com/jquery-3.1.1.js"
+            integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+            crossorigin="anonymous"></script>
+
+    <link href="css/bootstrap.min.css"  rel="stylesheet">
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+
+    <style>
+        .group_buttons {
+            position: fixed;
+            top: 40%;
+            left: 70px;
+        }
+    </style>
+
+    <style>
+        .table_align {
+            text-align: center;
+            border-bottom: 1px solid black;
+            height: 30px;
+        }
+    </style>
+
+</head>
+<body>
+<div class="group_buttons">
+    <div class="dropdown" style="position: relative; top: -30px">
+        <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" style="width: 242px">
+            <div class="glyphicon glyphicon-refresh"></div>
+            Получить/обновить данные
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a onclick="getUsersData('id');">Упорядочить по id</a></li>
+            <li><a onclick="getUsersData('login')">Упорядочить по login</a></li>
+        </ul>
+    </div>
+    <div class="btn-group-vertical">
+        <button id="addNewUserButton" class="btn btn-default">
+            <div class="glyphicon glyphicon-plus-sign"></div>
+            Добавить пользователя
+        </button>
+        <button id="deleteUser" class="btn btn-default">
+            <div class="glyphicon glyphicon-remove-sign"></div>
+            Удалить пользователя
+        </button>
+        <button id="changeUserRights" class="btn btn-default">
+            <div class="glyphicon glyphicon-pencil"></div>
+            Изменить права пользователя
+        </button>
+    </div>
+    <div align="center">
+        <button class="btn btn-default" style="margin-top: 30px;width: 242px" onclick="document.location.href='index.jsp'">
+            <div class="glyphicon glyphicon-home"></div>
+            Выйти в меню авторизации
+        </button>
+    </div>
+</div>
+
+<table id="table" width="50%" bgcolor="#dcdcdc" align="center" cellpadding="10px" cellspacing="0" style="border-bottom: 1px solid black">
+    <tr id="descript_row"><th class="table_align">id</th><th class="table_align">login</th><th class="table_align">password</th><th class="table_align>">access maps</th></tr>
+</table>
+
+<script>
+
+    function getUsersData(sortBy) {
+        $('#table').empty();
+        $.ajax({
+            url: "servletAdminsControl",
+            type: "POST",
+            dataType: "json",
+            data: ("action=" + "getUsersData" + "&sortBy=" + sortBy),
+            success: function (data) {
+                usersDataInsertInTable(data);
+            }
+        });
+    }
+
+    function usersDataInsertInTable(data) {
+        $('#table').append('<tr id="descript_row"><th class="table_align">id</th><th class="table_align">login</th><th class="table_align">password</th><th class="table_align">access maps</th></tr>');
+        for (var i=0;i<data.length;i++) {
+            $('#table').append('<tr><td class="table_align">' + data[i].id + '</td><td class="table_align">' + data[i].login +
+                '</td><td class="table_align">' + data[i].password +'</td><td class="table_align">' + data[i].access_maps_array.toString() + '</td></tr>');
+        }
+    }
+
+    $('#table').on('click', 'tr',function () {
+        if ($(this).attr('id') != "descript_row") {
+            if (this.style.backgroundColor == 'blue')
+                $(this).css('background', 'white');
+            else
+                $(this).css('background', 'blue');
+        }
+    });
+
+    //$('#table').append('<tr> <td>qq</td><td>ee</td><td>ee</td> </tr>');
+</script>
+
+<div id="addUserModalWindow" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Заголовок модального окна -->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                <h4 class="modal-title">Добавление нового пользователя</h4>
+            </div>
+            <!-- Основное содержимое модального окна -->
+            <div class="modal-body" style="height: 200px">
+                <form class="form">
+                    <div class="col-xs-6 col-md-6">
+                        <div class="input-group">
+                            <div class="input-group-addon"><div class="glyphicon glyphicon-user"></div></div>
+                            <input type="text" id="new_login" style="width: 500px;" class="form-control" placeholder="Login" required>
+                        </div>
+                        <div class="input-group">
+                            <div class="input-group-addon"><div class="glyphicon glyphicon-lock"></div></div>
+                            <input type="password" id="new_password" style="width: 500px;" class="form-control" placeholder="Password" required>
+                        </div>
+                        <div class="input-group">
+                            <div class="input-group-addon"><div class="glyphicon glyphicon-eye-open"></div></div>
+                            <input type="text" title="Введите номера доступных карт через запятую" id="new_access_data" style="width: 500px;" class="form-control" placeholder="Номера доступных карт">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- Футер модального окна -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" onclick="addNewUser()">Добавить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#addNewUserButton').on('click', function () {
+        $('#addUserModalWindow').modal('show');
+    });
+
+    function addNewUser() {
+        var login = document.getElementById('new_login').value;
+        var password = document.getElementById('new_password').value;
+        var access_data = document.getElementById('new_access_data').value;
+
+        if (password.length < 6) {
+            alert('Пароль должен содержать более 5 символов');
+            return;
+        }
+
+        $.ajax({
+            url: "servletAdminsControl",
+            type: "POST",
+            dataType: "text",
+            data: ('action=' + "addNewUser" +'&login=' + login + '&password=' + password + "&access_data=" + access_data),
+            success: function (data) {
+                if (data[0] == 'y')
+                    alert('Пользователь успешно добавлен');
+                else if (data[0] == 'l')
+                    alert ('Пользователь с такми логином уже существует');
+                else
+                    alert('Пользователь не добавлен' + ' ' + data[0]);
+            }
+        })
+    }
+
+</script>
+
+<script>
+    $('#deleteUser').click(function () {
+        var arr_delUsersId = [];
+
+        $('#table tr').each(function () {
+            if (this.style.backgroundColor == 'blue') {
+                var delUserId = $(this).find('td').eq(0).text();
+
+                arr_delUsersId.push(delUserId);
+                $(this).remove();
+            }
+        });
+
+        if (arr_delUsersId.toString() == "")
+            alert("Не выбраны пользователи для удаления");
+        else {
+            $.ajax({
+                url: "servletAdminsControl",
+                type: "POST",
+                dataType: "test",
+                data: ('action=' + "deleteUser" + '&id=' + arr_delUsersId.toString()),
+                success: function (data) {
+                    alert(data.toString());
+                    if (data[0] == 'y')
+                        alert('Строки успешно удалены');
+                    else if (data[0] == 'i')
+                        alert('Строка с таким id не найдена в базе данных');
+                }
+            })
+        }
+
+    });
+</script>
+
+<div id="changeUserRightsModalWindow" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Заголовок модального окна -->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">?</button>
+                <h4 class="modal-title">Изменение прав пользователя</h4>
+            </div>
+            <!-- Основное содержимое модального окна -->
+            <div class="modal-body" style="height: 200px">
+                <form class="form">
+                    <div class="col-xs-6 col-md-6">
+                        <div class="input-group">
+                            <div class="input-group-addon"><div class="glyphicon glyphicon-eye-close"></div></div>
+                            <input type="text" title="Текующие доступные карты" id="old_access_data" style="width: 500px;" class="form-control" placeholder="Текущие доступные карты" readonly>
+                        </div>
+                        <div class="input-group">
+                            <div class="input-group-addon"><div class="glyphicon glyphicon-eye-open"></div></div>
+                            <input type="text" title="Введите номера доступных карт через запятую" id="renew_access_data" style="width: 500px;" class="form-control" placeholder="Новые номера доступных карт">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- Футер модального окна -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" onclick="changeUserData();">Изменить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var changeUserId = "";
+    var changeUserLogin = "";
+
+    $('#changeUserRights').on('click', function () {
+        var counter = 0;
+        var oldAccessData;
+        $('#table tr').each(function () {
+            if (this.style.backgroundColor == 'blue') {
+                changeUserId = $(this).find('td').eq(0).text();
+                changeUserLogin = $(this).find('td').eq(1).text();
+                oldAccessData = $(this).find('td').eq(3).text();
+                counter++;
+            }
+        });
+        if (counter > 1) {
+            alert("Нельзя изменять права одновременно у нескольких пользователей. Выберете одного пользователя.");
+        }
+        else if (counter == 0) {
+            alert("Вы не выбрали пользователя");
+        }
+        else if (counter == 1) {
+            $('#changeUserRightsModalWindow').modal('show');
+            document.getElementById('old_access_data').value = oldAccessData;
+        }
+    });
+
+    function changeUserData() {
+        var new_access_data = document.getElementById('renew_access_data').value;
+
+        $.ajax({
+            url: "servletAdminsControl",
+            type: "POST",
+            dataType: "text",
+            data: ('action=' + "changeUserRights" + "&id=" + changeUserId + "&login=" + changeUserLogin +'&access_data=' + new_access_data),
+            success: function (data) {
+                if (data[0] == 'y')
+                    alert("Данные успешно изменены");
+                else
+                    alert("Данные не были изменены");
+            }
+        })
+    }
+</script>
+
+</body>
+</html>

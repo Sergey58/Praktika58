@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+    <title>Registration</title>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.js"
+            integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+            crossorigin="anonymous"></script>
+    <link href="css/bootstrap.min.css"  rel="stylesheet">
+
+    <link rel="stylesheet" href="https://openlayers.org/en/v3.20.1/css/ol.css" type="text/css">
+</head>
+<body>
+
+<script>
+    function reg() {
+        var login = document.getElementById('login').value;
+        var password1 = document.getElementById('pass1').value;
+        var password2 = document.getElementById('pass2').value;
+
+        $('#login').css("background","white");
+        $('#pass1').css("background","white");
+        $('#pass2').css("background","white");
+
+
+        if(login!=''&&password1!=''){
+        if(password1==password2) {
+            $.ajax({
+                url: "MyServlet",
+                type: "GET",
+                dataType: "text",
+                data: ("reg_login=" + login + "&reg_password=" + password1),
+                success: function (data) {
+                    if (data[0] == "y") {
+                        alert("Поздравляем, вы успешно зарегистрировались!")
+                        $('#login').css("background", "lightgreen");
+                        $('#pass1').css("background", "lightgreen");
+                        $('#pass2').css("background", "lightgreen");
+                    }
+                    if (data[0] == "l") {
+                        alert("Данный login уже занят!");
+                        $('#login').css("background", "pink");
+                    }
+                },
+                error: function (e) {
+                    alert("error");
+                }
+            })
+        }
+        else
+        {
+            alert("Error: Пароли не совпадают!");
+            $('#pass1').css("background","pink");
+            $('#pass2').css("background","pink");
+        }
+    }
+    else
+        {
+            alert("Error: Необходимо заполнить все поля!");
+        }
+    }
+</script>
+
+<div style="margin-left: 40px">
+    <div class="input-group" style="width: 30%;margin-top: 20px" >
+        <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
+        <input type="text" class="form-control" placeholder="Введите имя пользователя" id="login">
+    </div>
+</div>
+
+<div style="margin-left: 40px">
+    <div class="input-group" style="width: 30%;margin-top: 20px" >
+        <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+        <input type="password" required class="form-control" placeholder="Введите пароль" id="pass1">
+    </div>
+</div>
+
+<div style="margin-left: 40px">
+    <div class="input-group" style="width: 30%;margin-top: 20px" >
+        <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+        <input type="password" required class="form-control" placeholder="Повторите пароль" id="pass2">
+    </div>
+</div>
+
+<div style="margin-top: 20px" class="form-group">
+    <div class="col-offset-4 col-4" align="left" style="margin-left: 40px">
+        <button type="button" class="btn btn-info" style="width: auto" onclick="reg();">
+            <div class="glyphicon glyphicon-ok"></div>
+            Зарегистрироваться
+        </button>
+        <button type="button" class="btn btn-default" style="width: auto" onclick="document.location.href='index.jsp'">
+            <div class="glyphicon glyphicon-circle-arrow-left"></div>
+            Вернуться
+        </button>
+    </div>
+</div>
+</body>
+</html>
